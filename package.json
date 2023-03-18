@@ -1,0 +1,24 @@
+{
+  "name": "zod-101",
+  "version": "1.0.0",
+  "description": "simple workthrough for learning zod through tutorials",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [
+    "zod",
+    "vitest",
+    "typescript"
+  ],
+  "author": "kharioki",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "typescript": "^5.0.2",
+    "vitest": "^0.29.3"
+  },
+  "dependencies": {
+    "zod": "^3.21.4"
+  }
+}
