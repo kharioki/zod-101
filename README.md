@@ -114,3 +114,49 @@ it("should return the name", async () => {
 Any additional keys you add to the `PersonResult` `ZodObject` from the original API response will be included in the `parsedData` variable.
 
 ____
+
+## Create an Array of Custom Types
+
+Consider the following API fetch:
+
+```ts
+const StarWarsPerson = z.unknown();
+
+const StarWarsPeople = z.unknown();
+
+export const fetchStarWarsPeople = async () => {
+  const data = await fetch("https://swapi.dev/api/people/").then(response => response.json());
+
+  const parsedData = StarWarsPeople.parse(data);
+
+  return parsedData.results;
+}
+```
+
+The correct way to solve this challenge is to create an object that references other objects. In this case `StarWarsPeople` will be a `z.object` that contains `results`.
+
+Declaring arrays of objects like this is one of the most common use cases for `z.array()`, especially when referencing types you already created.
+  
+```ts
+const StarWarsPerson = z.object({
+  name: z.string(),
+});
+
+const StarWarsPeople = z.object({
+  results: z.array(StarWarsPerson)
+});
+
+export const fetchStarWarsPeople = async () => {
+  const data = await fetch("https://swapi.dev/api/people/").then(response => response.json());
+
+  const parsedData = StarWarsPeople.parse(data);
+
+  return parsedData.results;
+}
+
+// Tests
+it("Should return the name", async () => {
+  const people = await fetchStarWarsPeople();
+  expect(people[0].name).toEqual("Luke Skywalker");
+});
+```
