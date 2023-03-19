@@ -2,6 +2,8 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    // This is the default value
+    include: ['src/**/*.test.ts'],
+    setupFiles: ['scripts/setup.ts'],
+    passWithNoTests: true,
   },
 })

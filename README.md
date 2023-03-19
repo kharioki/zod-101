@@ -62,3 +62,55 @@ it("should return a strung when called with a number", () => {
 ```
 
 We create a `numberParser` using the `z.number()` function. This is a `ZodSchema` object that we can use to parse the `num` variable. If the `num` variable is not a number, the `parse()` function will throw an error. This means that any variable we create by calling `numberParser.parse()` will be typed as a number, and our tests will pass.
+
+____
+
+## Verify Unknown APIs with an Object Schema
+
+Zod is commonly used for verifying unknown APIs. Consider the following API fetch:
+
+```ts
+const PersonResult = z.unknown();
+
+export const fetchStarWarsPersonName = async (id: string) => {
+  const data = await fetch("https://swapi.dev/api/people/" + id).then((res) =>
+    res.json(),
+  );
+
+  const parsedData = PersonResult.parse(data);
+
+  return parsedData.name;
+};
+```
+
+In the above instance the `PersonResult` variable is created with `z.unknown()`. This means that we are saying that we don't know what the API response will be.
+
+The test does pass - it's the issue of `PersonResult` being typed as `unknown` that we want to solve.
+
+**Solution** - update the `PersonResult` variable to be a `ZodObject`:
+
+```ts
+const PersonResult = z.object({
+  name: z.string(),
+});
+
+export const fetchStarWarsPersonName = async (id: string) => {
+  const data = await fetch("https://swapi.dev/api/people/" + id).then((res) =>
+    res.json(),
+  );
+
+  const parsedData = PersonResult.parse(data);
+
+  return parsedData.name;
+};
+
+// Tests
+it("should return the name", async () => {
+  expect(await fetchStarWarsPersonName("1")).toEqual("Luke Skywalker");
+  expect(await fetchStarWarsPersonName("2")).toEqual("C-3PO");
+});
+```
+
+Any additional keys you add to the `PersonResult` `ZodObject` from the original API response will be included in the `parsedData` variable.
+
+____
