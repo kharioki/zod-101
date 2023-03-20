@@ -190,3 +190,69 @@ const logStarWarsPeople = (data: z.infer<typeof StarWarsPeople>) => {
 ```
 
 ____
+
+## Make Schemas Optional
+
+Zod is also useful for validating user input. Consider the following form:
+
+```ts
+import { expect, it } from "vitest";
+import { z } from "zod";
+
+const Form = z.object({
+  name: z.string(),
+  phoneNumber: z.string(),
+});
+
+export const validateFormInput = (values: unknown) => {
+  const parsedData = Form.parse(values);
+
+  return parsedData;
+};
+
+// TESTS
+
+it("Should validate correct inputs", async () => {
+  expect(() =>
+    validateFormInput({
+      name: "Matt",
+    }),
+  ).not.toThrow();
+
+  expect(() =>
+    validateFormInput({
+      name: "Matt",
+      phoneNumber: "123",
+    }),
+  ).not.toThrow();
+});
+
+it("Should throw when you do not include the name", async () => {
+  expect(() => validateFormInput({})).toThrowError("Required");
+});
+```
+
+The `phoneNumber` field is optional, but we want to make sure that the `name` field is required. We can do this by adding `.optional()` to the `phoneNumber` field.
+
+```ts
+const Form = z.object({
+  name: z.string(),
+  phoneNumber: z.string().optional(),
+});
+```
+
+____
+
+## Set a Default Value
+
+Consider the following form:
+
+```ts
+import { expect, it } from "vitest";
+import { z } from "zod";
+
+const Form = z.object({
+  name: z.string(),
+  phoneNumber: z.string().optional(),
+});
+```
