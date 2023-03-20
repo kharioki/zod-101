@@ -474,3 +474,66 @@ const User = ObjectWithId.merge(
 Merging is generally used when two different types are being combined, rather than extending a single type.
 
 ____
+
+## Transforming Data from within a Schema
+
+Another useful feature of Zod is manipulating data from an API response after parsing. Consider the following API response:
+
+```ts
+import { z } from "zod";
+
+const StarWarsPerson = z.object({
+  name: z.string(),
+});
+
+const StarWarsPeopleResults = z.object({
+  results: z.array(StarWarsPerson),
+});
+
+export const fetchStarWarsPeople = async () => {
+  const response = await fetch("https://swapi.dev/api/people/");
+  const data = await response.json();
+
+  const parsedData = StarWarsPeopleResults.parse(data);
+
+  return parsedData;
+};
+```
+
+We can use the `.transform` keyword to manipulate the data from the API response. In this case, we want to transform the `name` field and add a new field called `nameAsArray`.
+
+```ts
+import { z } from "zod";
+
+const StarWarsPerson = z
+  .object({
+    name: z.string(),
+  })
+  .transform((person) => ({
+    ...person,
+    nameAsArray: person.name.split(" "),
+  }));
+
+const StarWarsPeopleResults = z.object({
+  results: z.array(StarWarsPerson),
+});
+
+export const fetchStarWarsPeople = async () => {
+  const data = await fetch(
+    "https://www.totaltypescript.com/swapi/people.json",
+  ).then((res) => res.json());
+
+  const parsedData = StarWarsPeopleResults.parse(data);
+
+  return parsedData.results;
+};
+
+// TESTS
+
+it("Should resolve the name and nameAsArray", async () => {
+  expect((await fetchStarWarsPeople())[0]).toEqual({
+    name: "Luke Skywalker",
+    nameAsArray: ["Luke", "Skywalker"],
+  });
+});
+```
