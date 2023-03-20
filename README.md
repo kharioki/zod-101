@@ -386,3 +386,91 @@ export const validateFormInput = (values: unknown) => {
   return parsedData;
 };
 ```
+
+____
+
+## Reducing duplicated code by composing schemas
+
+Consider the following code:
+
+```ts
+import { z } from "zod";
+
+const User = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+});
+
+const Post = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  body: z.string(),
+});
+
+const Comment = z.object({
+  id: z.string().uuid(),
+  text: z.string(),
+});
+```
+
+There are a few ways we can refactor this code.
+
+**Simple solution**
+We can strip out the `id` into its own type. Then we can use the `Id` type in the `User`, `Post`, and `Comment` types.
+
+```ts
+const Id = z.string().uuid();
+
+const User = z.object({
+  id: Id,
+  name: z.string(),
+});
+
+const Post = z.object({
+  id: Id,
+  title: z.string(),
+  body: z.string(),
+});
+
+const Comment = z.object({
+  id: Id,
+  text: z.string(),
+});
+```
+
+**Better solution** - use the Extend method
+Another solution would be to create a base object `ObjectWithId` and extend it with the `User`, `Post`, and `Comment` types.
+
+```ts
+const ObjectWithId = z.object({
+  id: z.string().uuid(),
+});
+
+const User = ObjectWithId.extend({
+  name: z.string(),
+});
+
+const Post = ObjectWithId.extend({
+  title: z.string(),
+  body: z.string(),
+});
+
+const Comment = ObjectWithId.extend({
+  text: z.string(),
+});
+```
+
+**Use Merge**
+We can also use the `.merge` keyword to merge the `ObjectWithId` and the `User`, `Post`, and `Comment` types.
+
+```ts
+const User = ObjectWithId.merge(
+  z.object({
+    name: z.string(),
+  }),
+);
+```
+
+Merging is generally used when two different types are being combined, rather than extending a single type.
+
+____
