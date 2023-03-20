@@ -248,11 +248,68 @@ ____
 Consider the following form:
 
 ```ts
+import { z } from "zod";
+
+const Form = z.object({
+  repoName: z.string(),
+  keywords: z.array(z.string()).optional(),
+});
+
+export const validateFormInput = (values: unknown) => {
+  const parsedValues = Form.parse(values);
+
+  return parsedValues;
+}
+```
+
+Suppose we want to default the `keywords` field to an empty array if the user does not provide any keywords. We can do this by adding `.default()` to the `keywords` field.
+
+```ts
 import { expect, it } from "vitest";
 import { z } from "zod";
 
 const Form = z.object({
-  name: z.string(),
-  phoneNumber: z.string().optional(),
+  repoName: z.string(),
+  keywords: z.array(z.string()).default([]),
+});
+
+export const validateFormInput = (values: unknown) => {
+  const parsedValues = Form.parse(values);
+
+  return parsedValues;
+}
+
+// Tests
+it("Should include keywords if passed", async () => {
+  const result = validateFormInput({ repoName: "vitest", keywords: ["test", "testing"] });
+
+  expect(result).toEqual({ repoName: "vitest", keywords: ["test", "testing"] });
+  expect(result.keywords).toEqual(["test", "testing"]);
+});
+
+it("Should not include keywords if not passed", async () => {
+  const result = validateFormInput({ repoName: "vitest" });
+
+  expect(result.keywords).toEqual([]);
 });
 ```
+
+**The Input is Different than the Output**
+The `validateFormInput` function returns an object that is different than the input. The `keywords` field is always an array, even if the user does not provide any keywords.
+
+If we create a `FormInput` and `FornOutput` type, we can use the `z.infer` keyword to extract the type from the `Form` object.
+
+```ts
+type FormInput = z.infer<typeof Form>;
+type FormOutput = z.infer<typeof Form>;
+```
+
+**Introducing `z.input`**
+The above input is not quite correct because when we input into `validateFormInput`, we don't pass in any keywords. We can use the `z.input` keyword to extract the input type from the `Form` object.
+
+```ts
+type FormInput = z.input<typeof Form>;
+type FormOutput = z.infer<typeof Form>;
+```
+
+____
