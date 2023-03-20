@@ -313,3 +313,36 @@ type FormOutput = z.infer<typeof Form>;
 ```
 
 ____
+
+## Being specific with Allowed Types
+
+Consider the following form:
+
+```ts
+const Form = z.object({
+  repoName: z.string(),
+  privacyLevel: z.string(),
+});
+```
+
+Suppose we want to make sure that the `privacyLevel` field is either `public` or `private`. We can do this by adding `.enum()` to the `privacyLevel` field.
+
+```ts
+const Form = z.object({
+  repoName: z.string(),
+  privacyLevel: z.enum(["public", "private"]),
+});
+```
+
+Another way is to use the `z.union` keyword and pass in an array of `z.literal` objects. You can use `.literal()` to represent any literal value.
+
+```ts
+const Form = z.object({
+  repoName: z.string(),
+  privacyLevel: z.union([z.literal("public"), z.literal("private")]),
+});
+```
+
+The `.enum()` keyword is arguably more readable, but the `z.union` keyword is more flexible.
+
+____
