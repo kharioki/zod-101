@@ -160,3 +160,33 @@ it("Should return the name", async () => {
   expect(people[0].name).toEqual("Luke Skywalker");
 });
 ```
+
+____
+
+## Extracting a Type from a Parser Object
+
+In the above example we created a `StarWarsPerson` object that we used to parse the `results` array. We can extract the type from the `StarWarsPerson` object using the `infer` keyword.
+
+```ts
+type StarWarsPersonType = z.infer<typeof StarWarsPerson>;
+```
+
+This will allow us to use the `StarWarsPersonType` type in other places in our codebase.
+
+```ts
+import { z } from "zod";
+
+const StarWarsPerson = z.object({
+  name: z.string(),
+});
+
+const StarWarsPeople = z.object({
+  results: z.array(StarWarsPerson)
+});
+
+const logStarWarsPeople = (data: z.infer<typeof StarWarsPeople>) => {
+  data.results.map(person => console.log(person.name));
+}
+```
+
+____
