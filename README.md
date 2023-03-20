@@ -346,3 +346,43 @@ const Form = z.object({
 The `.enum()` keyword is arguably more readable, but the `z.union` keyword is more flexible.
 
 ____
+
+## Complex Schema Validation
+
+Consider the following form:
+
+```ts
+import { z } from "zod";
+
+const Form = z.object({
+  name: z.string(),
+  phoneNumber: z.string().optional(),
+  email: z.string(),
+  website: z.string().optional(),
+});
+
+export const validateFormInput = (values: unknown) => {
+  const parsedData = Form.parse(values);
+
+  return parsedData;
+};
+```
+
+Suppose we want to add a few constraints on what the values can be. We want to validate that the name is at least 1 character, the phone number to have the right amount of digits, and we want the website to be a valid URL and email to be a valid email address.
+
+```ts
+import { z } from "zod";
+
+const Form = z.object({
+  name: z.string().min(1),
+  phoneNumber: z.string().min(5).max(20).optional(),
+  email: z.string().email(),
+  website: z.string().url().optional(),
+});
+
+export const validateFormInput = (values: unknown) => {
+  const parsedData = Form.parse(values);
+
+  return parsedData;
+};
+```
